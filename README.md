@@ -1,6 +1,8 @@
-# pocketsvelte
-
 ![pocketsvelte](https://flaced.b-cdn.net/pocketsvelte.webp)
+
+![NPM Version](https://img.shields.io/npm/v/%40flaced%2Fpocketsvelte?style=flat-square&logo=npm)
+
+<br />
 
 Welcome to `@flaced/pocketsvelte`! This NPM module allows you to easily create a monorepo with SvelteKit and Pocketbase. During the setup process, you can customize various aspects of your Svelte project, such as whether to include [ESLint](https://eslint.org/ "ESLint's Homepage"), [Prettier](https://prettier.io/ "Prettier's Homepage"), and more. Additionally, [TailwindCSS](https://tailwindcss.com/ "TailwindCSS's Homepage") can be automatically installed, including the [Typography plugin](https://github.com/tailwindlabs/tailwindcss-typography), all in their latest versions.
 
