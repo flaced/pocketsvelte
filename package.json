@@ -1,13 +1,28 @@
 {
   "name": "@flaced/pocketsvelte",
-  "version": "1.0.4",
-  "description": "",
+  "version": "1.0.5",
   "bin": "/cli/bin.js",
+  "keywords": [
+    "svelte",
+    "cli",
+    "template",
+    "tailwindcss",
+    "vite",
+    "create-svelte",
+    "pocketbase"
+  ],
+  "bugs": {
+    "url": "https://github.com/flaced/pocketsvelte/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flaced/pocketsvelte.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "flaced",
-  "license": "ISC",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "@clack/prompts": "^0.7.0",
