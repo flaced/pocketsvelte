@@ -1,19 +1,20 @@
-import { intro, outro, select, text, spinner } from "@clack/prompts";
+#!/usr/bin/env node
+
+import {
+  intro,
+  outro,
+  select,
+  multiselect,
+  spinner,
+  confirm,
+} from "@clack/prompts";
 import { exec } from "node:child_process";
 import { create } from "create-svelte";
 import fs from "node:fs";
 import AdmZip from "adm-zip";
 
 async function main() {
-  intro(`create-my-app`);
-
-  const username = await text({
-    message: "What is your Username?",
-    placeholder: "Not sure",
-    validate(value) {
-      if (value.length === 0) return `Value is required!`;
-    },
-  });
+  intro(`Welcome to PocketSvelte!`);
 
   const pocketbase_versions = await fetch(
     "https://api.github.com/repos/pocketbase/pocketbase/releases",
@@ -24,7 +25,7 @@ async function main() {
   const pocketbase_versions_json = await pocketbase_versions.json();
   let pocketbase_version_options = [];
   pocketbase_versions_json.forEach((element) => {
-    if (pocketbase_version_options.length == 10) return;
+    if (pocketbase_version_options.length == 6) return;
     pocketbase_version_options.push({
       value: element.tag_name,
       label: element.tag_name,
@@ -33,7 +34,7 @@ async function main() {
   });
 
   const pocketbase_version = await select({
-    message: "Pick a PocketBase Version",
+    message: "Whick PocketBase Version do you want to use?",
     options: pocketbase_version_options,
   });
 
@@ -60,8 +61,37 @@ async function main() {
   }.zip`;
   const pocketbase_download_url = `https://github.com/pocketbase/pocketbase/releases/download/${pocketbase_version}/${pocketbase_name}`;
 
+  const additionalTools = await multiselect({
+    message: "Select additional tools for your SvelteKit project",
+    options: [
+      { value: "eslint", label: "ESLint" },
+      { value: "prettier", label: "Prettier", hint: "recommended" },
+      { value: "playwright", label: "Playwright" },
+    ],
+    required: false,
+  });
+
+  const addTailwindCSS = await confirm({
+    message: "Do you want to add Tailwind CSS to your project?",
+    required: false,
+  });
+
+  let typographyTailwindCSS = false;
+  if (addTailwindCSS) {
+    typographyTailwindCSS = await confirm({
+      message: "Do you want to add the Typography plugin to TailwindCSS?",
+      required: false,
+    });
+  }
+
   const s = spinner();
   s.start("Creating your Monorepo...");
+
+  if (fs.existsSync("pocketsvelte")) {
+    s.stop("Monorepo already exists.");
+    outro("Done. 🪄");
+    return;
+  }
 
   if (!fs.existsSync("pocketsvelte")) {
     fs.mkdirSync("pocketsvelte");
@@ -76,11 +106,11 @@ async function main() {
   fs.writeFileSync(".gitignore", "node_modules\n");
 
   const MAINpackageJsonContent = {
-    name: `@${username}/root`,
+    name: `@pocketsvelte/root`,
     scripts: {
       dev: "pnpm -r run dev",
-      "pocketbase:dev": `pnpm -F @${username}/pocketbase run dev`,
-      "sveltekit:dev": `pnpm -F @${username}/sveltekit run dev`,
+      "pocketbase:dev": `pnpm -F @pocketsvelte/pocketbase run dev`,
+      "sveltekit:dev": `pnpm -F @pocketsvelte/sveltekit run dev`,
     },
   };
   fs.writeFileSync(
@@ -100,11 +130,11 @@ async function main() {
 
   await create("sveltekit", {
     name: `sveltekit`,
-    template: "default", // or 'skeleton' or 'skeletonlib'
-    types: "checkjs", // or 'typescript' or null;
-    prettier: false,
-    eslint: false,
-    playwright: false,
+    template: "skeleton",
+    types: "typescript",
+    prettier: additionalTools.includes("prettier"),
+    eslint: additionalTools.includes("eslint"),
+    playwright: additionalTools.includes("playwright"),
     vitest: false,
   });
 
@@ -117,13 +147,19 @@ async function main() {
   );
 
   // Änderungen vornehmen
-  packageJsonContent.name = `@${username}/sveltekit`;
+  packageJsonContent.name = `@pocketsvelte/sveltekit`;
 
   // Datei mit aktualisierten Inhalten schreiben
   fs.writeFileSync(
     packageJsonPath,
     JSON.stringify(packageJsonContent, null, 2)
   );
+
+  if (addTailwindCSS) {
+    exec(
+      `npx @svelte-add/tailwindcss@latest --typography ${typographyTailwindCSS}`
+    );
+  }
 
   exec("pnpm i");
 
@@ -150,7 +186,7 @@ async function main() {
   });
 
   const POCKETBASEpackageJsonContent = {
-    name: `@${username}/pocketbase`,
+    name: `@pocketsvelte/pocketbase`,
     main: "index.js",
     scripts: {
       dev:
