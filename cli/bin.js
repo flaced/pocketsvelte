@@ -5,8 +5,10 @@ import {
   outro,
   select,
   multiselect,
+  text,
   spinner,
   confirm,
+  isCancel,
 } from "@clack/prompts";
 import { exec } from "node:child_process";
 import { create } from "create-svelte";
@@ -15,6 +17,19 @@ import AdmZip from "adm-zip";
 
 async function main() {
   intro(`Welcome to PocketSvelte!`);
+
+  // create the project
+  const dir = await text({
+    message: "Where should I create your project?",
+    placeholder: "(press Enter to use the current directory)",
+  });
+
+  if (isCancel(dir)) {
+    cancel("Operation cancelled.");
+    return process.exit(0);
+  }
+
+  let cwd = dir || ".";
 
   const pocketbase_versions = await fetch(
     "https://api.github.com/repos/pocketbase/pocketbase/releases",
@@ -34,7 +49,7 @@ async function main() {
   });
 
   const pocketbase_version = await select({
-    message: "Whick PocketBase Version do you want to use?",
+    message: "Which PocketBase version do you want to use?",
     options: pocketbase_version_options,
   });
 
@@ -64,7 +79,7 @@ async function main() {
   const additionalTools = await multiselect({
     message: "Select additional tools for your SvelteKit project",
     options: [
-      { value: "eslint", label: "ESLint" },
+      { value: "eslint", label: "ESLint", hint: "recommended" },
       { value: "prettier", label: "Prettier", hint: "recommended" },
       { value: "playwright", label: "Playwright" },
     ],
@@ -87,20 +102,15 @@ async function main() {
   const s = spinner();
   s.start("Creating your Monorepo...");
 
-  if (fs.existsSync("pocketsvelte")) {
-    s.stop("Monorepo already exists.");
-    outro("Done. 🪄");
-    return;
-  }
+  if (cwd != ".") {
+    if (!fs.existsSync(cwd)) {
+      fs.mkdirSync(cwd);
+    }
 
-  if (!fs.existsSync("pocketsvelte")) {
-    fs.mkdirSync("pocketsvelte");
+    process.chdir(cwd);
   }
-
-  process.chdir("pocketsvelte");
 
   exec("pnpm init");
-
   exec("git init");
 
   fs.writeFileSync(".gitignore", "node_modules\n");
@@ -161,8 +171,6 @@ async function main() {
     );
   }
 
-  exec("pnpm i");
-
   // POCKETBASE
   process.chdir("../");
 
@@ -197,6 +205,8 @@ async function main() {
     "package.json",
     JSON.stringify(POCKETBASEpackageJsonContent, null, 2)
   );
+
+  exec("pnpm i");
 
   s.stop("Monorepo created.");
 
