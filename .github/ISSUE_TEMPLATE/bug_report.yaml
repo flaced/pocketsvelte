@@ -1,0 +1,45 @@
+name: Bug report
+description: Report an issue with @flaced/pocketsvelte
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is. If you intend to submit a PR for this issue, tell us how in the description. Thanks!
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Please include your Terminal console or logs around the time this bug occurred. Please try not to insert an image but copy paste the log text.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: Output of `npx envinfo --system` If you ignore this and the issue is related to the package itself, your issue will be closed without warning.
+      render: bash
+      placeholder: System Informaiton
+    validations:
+      required: true
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: Select the urgency of this issue
+      options:
+        - Very urgent
+        - Urgent
+        - Normal
+        - Not important but please fix
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Credits to [huntabyte/bits-ui](https://github.com/huntabyte/bits-ui/tree/main) for the issue template.
